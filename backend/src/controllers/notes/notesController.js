@@ -1,4 +1,52 @@
 import Note from "../../models/Note.js"
+import { JsonFormatter, MarkdownFormatter } from '../../services/export/Formatters.js';
+import { DownloadExporter, ConsoleExporter } from '../../services/export/Exporters.js';
+
+export const exportNote = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { format = 'json', method = 'download' } = req.query;
+
+    const note = await Note.findById(id);
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
+    let formatter;
+    if (format === 'markdown') {
+      formatter = new MarkdownFormatter();
+    } else {
+      formatter = new JsonFormatter();
+    }
+
+    let exporter;
+    if (method === 'console') {
+      exporter = new ConsoleExporter(formatter);
+    } else {
+      exporter = new DownloadExporter(formatter);
+    }
+
+    const result = exporter.export(note);
+
+    if (result.type === 'download') {
+      const contentType = format === 'markdown' ? 'text/markdown' : 'application/json';
+      const fileExtension = format === 'markdown' ? 'md' : 'json';
+      
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `attachment; filename="note-${id}.${fileExtension}"`);
+      return res.send(result.data);
+    } 
+    
+    if (result.type === 'console') {
+      return res.status(200).json({ success: true, message: "Exported to backend console" });
+    }
+
+  } catch (error) {
+    console.error("Export Error:", error);
+    next(error);
+  }
+};
+
 export async function getAllNotes( req, res){
     try {
         const notes = await Note.find().sort({createdAt:-1}); // sort by newest

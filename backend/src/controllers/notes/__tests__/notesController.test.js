@@ -2,7 +2,6 @@ import { jest } from '@jest/globals';
 import * as notesController from '../notesController.js';
 import Note from '../../../models/Note.js';
 
-// Jest automatically mocks default exports from ES modules
 jest.mock('../../../models/Note.js');
 
 describe('Notes Controller', () => {

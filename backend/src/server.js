@@ -7,11 +7,12 @@ import cors from 'cors';
 import path from "path";
 
 
-dotenv.config();
+
 const app = express();
 const port = 5001;
 
 const __dirname = path.resolve()
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 
 if(process.env.NODE_ENV !== "production"){
