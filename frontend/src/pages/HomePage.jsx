@@ -17,7 +17,7 @@ const HomePage = () => {
       try {
         const res = await api.get("/notes");
         console.log(res.data);
-        setNotes(res.data);
+        setNotes(res.data.data || res.data);  // Handle both wrapped and unwrapped responses
         setIsRateLimited(false);
       } catch (error) {
         console.log("Error fetching notes");
